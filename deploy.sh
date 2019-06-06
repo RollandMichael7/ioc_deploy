@@ -24,16 +24,16 @@ CALC=calc
 DEVIOCSTATS=iocStats
 SEQ=seq
 SSCAN=sscan
-BASE_TOP=/eApps/epics
+BASE_TOP=/epicsW
 BASE=base
-SUPPORT=/eApps/epics/support
+SUPPORT=/epicsW/support
 
 declare -a det=("ADProsilica"
     "ADSimDetector"
-    "ADPluginBar"
-    "ADCompVision"
-    "ADPluginEdge"
-    "ADUVC"
+#    "ADPluginBar"
+#    "ADCompVision"
+#    "ADPluginEdge"
+#    "ADUVC"
     "ADAndor3"
     "ADPilatus"
     "ADMerlin"
@@ -41,6 +41,9 @@ declare -a det=("ADProsilica"
 #    "ADLambda"
     "ADPointGrey"
 #    "ADEiger"
+    "ADDexela"
+    "ADPerkinElmer"
+    "ADURL"
     )
 
 # additional EPICS modules to be packaged
@@ -315,11 +318,14 @@ cp README_$NAME.txt $HOME/temp/README.txt
 
 # tar it up
 cd $HOME
-echo tarring...
-tar -czf $NAME.tgz -C temp .
+#echo tarring on linux...
+#tar -czf $NAME.tgz -C temp .
+echo zipping on  Windows ...
+zip -r $NAME.zip temp 
 echo done.
 
-mv $NAME.tgz $DESTINATION
+#mv $NAME.tgz $DESTINATION
+mv $NAME.zip $DESTINATION
 rm -rf temp
 
 end="$(date +%s)"

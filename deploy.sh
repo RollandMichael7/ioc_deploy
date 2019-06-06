@@ -24,9 +24,9 @@ CALC=calc
 DEVIOCSTATS=iocStats
 SEQ=seq
 SSCAN=sscan
-BASE_TOP=/epicsW
+BASE_TOP=/mnt/c/epics
 BASE=base
-SUPPORT=/epicsW/support
+SUPPORT=/mnt/c/epics/support
 
 declare -a det=("ADProsilica"
     "ADSimDetector"
@@ -319,13 +319,13 @@ cp README_$NAME.txt $HOME/temp/README.txt
 # tar it up
 cd $HOME
 #echo tarring on linux...
-#tar -czf $NAME.tgz -C temp .
-echo zipping on  Windows ...
-zip -r $NAME.zip temp 
+tar -czf $NAME.tgz -C temp .
+#echo zipping on  Windows ...
+#zip -r $NAME.zip temp 
 echo done.
 
-#mv $NAME.tgz $DESTINATION
-mv $NAME.zip $DESTINATION
+mv $NAME.tgz $DESTINATION
+#mv $NAME.zip $DESTINATION
 rm -rf temp
 
 end="$(date +%s)"

@@ -5,6 +5,8 @@ import datetime
 import platform
 import subprocess
 import argparse
+import shutil
+import distutils.dir_util 
 
 knownArgs = ""
 
@@ -106,32 +108,32 @@ else:
     OS = platform.system()
     
     ## This is for linux command line 
-    if OS == "Linux":        
-        myCmds.append('find -name auto_settings.sav_* -exec rm -fv {} \\;')
-        myCmds.append('find -name auto_settings.savB* -exec rm -fv {} \\;')
-        myCmds.append('find -name core.* -exec rm -fv {} \\;')
-        myCmds.append('find -name *.exe.* -exec rm -fv {} \\;')
-    
-        ## The exectution of my commands that I have placed in my array 
-        os.system(myCmds[0])
-        os.system(myCmds[1])
-        os.system(myCmds[2])
-        os.system(myCmds[3])
+         
+    myCmds.append('find -name auto_settings.sav_* -exec rm -fv {} \\;')
+    myCmds.append('find -name auto_settings.savB* -exec rm -fv {} \\;')
+    myCmds.append('find -name core.* -exec rm -fv {} \\;')
+    myCmds.append('find -name *.exe.* -exec rm -fv {} \\;')
+    ## The exectution of my commands that I have placed in my array 
+    os.system(myCmds[0])
+    os.system(myCmds[1])
+    os.system(myCmds[2])
+    os.system(myCmds[3])
 
         
 
-        DATE = datetime.datetime.now()
+    DATE = datetime.datetime.now()
+    checkMyOS = "more /etc/issue | cut -d '\\' -f1 | tr ' ' _"
 
-
-        checkMyOS = "more /etc/issue | cut -d '\\' -f1 | tr ' ' _"
-
-        OS = os.popen(checkMyOS).read()
+    OS = os.popen(checkMyOS).read()
         
 
 
     ##Naming the tar file to be 
     NAME = "" + arg1+ "_" + arg2 + "_" + arg3 + "_" + str(OS) + str(DATE)
-
+    NAME = NAME.replace("\n","")
+    NAME = NAME.replace("'","")
+    NAME = NAME.replace("$","")
+    NAME = NAME.replace(" ","_")
     ## Path to the folder that will be containing the tar
     # will be created if it does nto exists
 
@@ -156,7 +158,7 @@ else:
     print(change_config)
     change_config = HOME + ""+ "" +change_config
     change_config = change_config.replace("\n", "")
-    
+    HOME = HOME.replace("\n","")
 
     with open(change_config, "r") as configChoice:
         DetectorArrayFound = False
@@ -176,11 +178,10 @@ else:
                 DetectorArrayFound = True
             elif line.startswith('##Detector array end'):
                 DetectorArrayFound = False
-            if line.startswith('##Module array start'):
+            if line.startswith('##Modules array start'):
                 ModuleArrayFound = True
-            elif line.startswith('##Module array end'):
+            elif line.startswith('##Modules array end'):
                 ModuleArrayFound = False
-            
             if DictionaryFound and not line.startswith('#') and len(line) > 2:
                 line = line.strip()
                 l = line.split("=")
@@ -189,7 +190,6 @@ else:
                 line = line.strip()
                 detectors.append(line)        
             if ModuleArrayFound and not line.startswith('#') and len(line) > 2:
-                print("Here ")
                 line = line.strip()
                 module.append(line)  
 
@@ -199,7 +199,7 @@ else:
     print(filePath)
     print(module)
 
-    myCmdSupport = "cd" + SUPPORT + ""
+    myCmdSupport = "cd" + filePath["SUPPORT"] + ""
 
     SUPPORT = os.popen("pwd").read()
 
@@ -207,10 +207,17 @@ else:
 
     os.system("cd " + DESTINATION)
 
-    os.system(""+NAME+".tgz > README_"+NAME+".txt")
-    os.system(">> README_"+NAME+".txt")
-    os.system("Version used in the deployment >> README_"+NAME+".txt")
+    tarFile = NAME + ".tgz"
+    readMe = "README_"+NAME+".txt"
 
+    file = open(readMe, "w")
+    file.write(tarFile)
+    file.write("\n")
+    file.write("Version used in this deployment " + OS)
+    file.write("\n")
+    file.write("##FOLDER NAME : GIT TAG##")
+    
+    distutils.dir_util.copy_tree(filePath["BASE"]+"/"+arg3, HOME+"/temp")
 
 
 

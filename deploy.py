@@ -7,6 +7,7 @@ import subprocess
 import argparse
 import shutil
 import distutils.dir_util 
+import stat
 
 knownArgs = ""
 
@@ -151,76 +152,99 @@ else:
         temp = myCmds[i]
         os.system(temp)
 
+    os.chmod("temp/",0o777)
     HOME = os.popen("pwd").read()
 
     myCmdHome = "cd "+ HOME + ""
-    print(HOME)
-    print(change_config)
     change_config = HOME + ""+ "" +change_config
     change_config = change_config.replace("\n", "")
     HOME = HOME.replace("\n","")
-
-    with open(change_config, "r") as configChoice:
-        DetectorArrayFound = False
-        ModuleArrayFound = False
-        DictionaryFound = False
-        detectors = []
-        module = []
-        filePath = {}
-        for line in configChoice:
-            print(line)
-
-            if line.startswith('##Required File Start'):
-                DictionaryFound = True
-            elif line.startswith('##Required File End'):
-                DictionaryFound = False
-            if line.startswith('##Detector array start'):
-                DetectorArrayFound = True
-            elif line.startswith('##Detector array end'):
-                DetectorArrayFound = False
-            if line.startswith('##Modules array start'):
-                ModuleArrayFound = True
-            elif line.startswith('##Modules array end'):
-                ModuleArrayFound = False
-            if DictionaryFound and not line.startswith('#') and len(line) > 2:
-                line = line.strip()
-                l = line.split("=")
-                filePath[l[0]] = l[1]
-            if DetectorArrayFound and not line.startswith('#') and len(line) > 2:
-                line = line.strip()
-                detectors.append(line)        
-            if ModuleArrayFound and not line.startswith('#') and len(line) > 2:
-                line = line.strip()
-                module.append(line)  
-
-
-
-    print(detectors)
-    print(filePath)
-    print(module)
-
-    myCmdSupport = "cd" + filePath["SUPPORT"] + ""
-
-    SUPPORT = os.popen("pwd").read()
+    AREA_DETECTOR= "areaDetector"
 
     os.system(HOME)
-
-    os.system("cd " + DESTINATION)
-
+    os.chdir(HOME+"/"+DESTINATION+"/")
     tarFile = NAME + ".tgz"
     readMe = "README_"+NAME+".txt"
-
+       
     file = open(readMe, "w")
     file.write(tarFile)
     file.write("\n")
     file.write("Version used in this deployment " + OS)
     file.write("\n")
     file.write("##FOLDER NAME : GIT TAG##")
+    os.chdir(HOME)
     
-    distutils.dir_util.copy_tree(filePath["BASE"]+"/"+arg3, HOME+"/temp")
-
-
-
-
-
-
+    with open(change_config, "r") as configChoice:
+        DetectorArrayFound = False
+        ModuleArrayFound = False
+        DictionaryFound = False
+        detectors = []
+        module = []
+        install_path =""
+        
+        for line in configChoice:
+            ##print(line)
+            line= line.strip()
+            if line.startswith('##Required File Start'):
+                DictionaryFound = True
+            elif line.startswith('##Required File End'):
+                DictionaryFound = False
+            elif line.startswith('##Detector array start'):
+                DetectorArrayFound = True
+            elif line.startswith('##Detector array end'):
+                DetectorArrayFound = False
+            elif line.startswith('##Modules start'): 
+                ModuleArrayFound = True
+            elif line.startswith('##Modules end'):
+                ModuleArrayFound = False
+            if DictionaryFound and not line.startswith('#') and len(line) > 2:
+                if line.startswith("INSTALL_PATH"):
+                    line = line.strip()
+                    r = line.split("=")
+                    install_path = str(r[1])
+                else:
+                    if line.startswith("BIN") or line.startswith("LIB"):
+                        line = line.strip()
+                        l = line.split("=")
+                        
+                        partOfInstall = str(l[1])
+                        temp = "temp/" + str(l[1]) + "/"+ arg3
+                        os.makedirs(temp)
+                        
+                        distutils.dir_util.copy_tree(install_path+partOfInstall+"/"+arg3, HOME +"/"+temp)
+                        """
+                        os.chdir(install_path+partOfInstall)
+                        path = os.popen("pwd").read()
+                        git = os.popen("git branch").read()
+                        start = git.find("R")
+                        end = git.find(")")
+                        version = git[start:end]
+                        ##commit_msg =os.popen("git log").read()
+                        file.write("\n")
+                        file.write(install_path + partOfInstall + "/" + arg3 + " : " + version)
+                        """
+                    else:
+                        line = line.strip()
+                        l = line.split("=")
+                        
+                        partOfInstall = str(l[1])
+                        temp = "temp/" + str(l[1])
+                        os.makedirs(temp)
+                        distutils.dir_util.copy_tree(install_path+partOfInstall, HOME +"/"+temp)  
+                        """
+                        os.chdir(install_path+partOfInstall)
+                        path = os.popen("pwd").read()
+                        git = os.popen("git branch").read()
+                        start = git.find("R")
+                        end = git.find(")")
+                        version = git[start:end]
+                        ##commit_msg =os.popen("git log").read()
+                        file.write("\n")
+                        file.write(install_path + partOfInstall + " : " + version)
+                        """
+            if DetectorArrayFound and not line.startswith('#') and len(line) > 2:
+                line = line.strip()
+                detectors.append(line)        
+            if ModuleArrayFound == True and not line.startswith('#') and len(line) > 2:
+                line = line.strip()
+                module.append(line)  

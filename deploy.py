@@ -16,7 +16,7 @@ knownArgs = ""
 
 
 def argumentReader():
-    count = 1
+    
     arr = []
     parser = argparse.ArgumentParser(description='To allow downloading of EPICS on different Systems')
     parser.add_argument('-f', '--f', action = 'store_true', help="")
@@ -30,16 +30,19 @@ def argumentReader():
 
 
     knownArgs = vars(check[0])
-    print(len(knownArgs))
+    
 
     if knownArgs['changeconfig'] is not None:
-      count = count + 2
       change_config = knownArgs['changeconfig']
       arr.append(str(change_config))
       print("I am going to change the config " + str(change_config))
+      
+    else:
+        change_config = "/configure"
+        arr.append(change_config)
     
 
-    print(knownArgs)
+    
      
     # Argument flags:
     #-f: Skip prompt to add another driver
@@ -61,121 +64,112 @@ def argumentReader():
         if knownArgs['a'] == True:
             DetArray = "y"
             print("Using list instead of prompt:")
-            count = count + 1
+            
             for i in range(len(det)):
                 print(det[i])
 
         else:
-            count = count + 1
+            
             SKIP = "y"
             print("Skipping Prompt.....")
         
         
-        arg1 = sys.argv[count]
-        arg2 = sys.argv[count+1]
-        arg3 = sys.argv[count+2]
-        arr.append(arg1)
-        arr.append(arg2)
-        arr.append(arg3)
+        
         return arr
     else:
         print("Bad Arguments")
         sys.exit(0)
 
 
+arg3 = ""
+
+
+list = argumentReader()                
+
+
+change_config = list[0]
 arg1 = ""
 arg2 = ""
 arg3 = ""
 
 
-list = argumentReader()                
-print(list)
+final = len(sys.argv)
 
-change_config = list[0]
-arg1 = list[1]
-arg2 = list[2]
-arg3 = list[3]
+print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Starting Script~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
 
 
-print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Starting Script~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+myCmds = [] ##I created a array that will store all my commands that i want to exectue on the command line
 
-if len(sys.argv)-4 != 3:
-    print("We ignore the python file name, we are looking for the 3 main parameters.")
-    print("You need to give the following: \n1 - The name of the detector (ADProsilica, etc.) \n2 - The version number (R2-0, etc.) \n3 - The EPICS architecture (linux-x86_64, etc.)")
+##I have to fgiure out if its a windows OS or a linux OS prior to do thing anything.
 
-else:
-    myCmds = [] ##I created a array that will store all my commands that i want to exectue on the command line
-
-    ##I have to fgiure out if its a windows OS or a linux OS prior to do thing anything.
-
-    OS = platform.system()
+OS = platform.system()
     
     ## This is for linux command line 
          
-    myCmds.append('find -name auto_settings.sav_* -exec rm -fv {} \\;')
-    myCmds.append('find -name auto_settings.savB* -exec rm -fv {} \\;')
-    myCmds.append('find -name core.* -exec rm -fv {} \\;')
-    myCmds.append('find -name *.exe.* -exec rm -fv {} \\;')
-    ## The exectution of my commands that I have placed in my array 
-    os.system(myCmds[0])
-    os.system(myCmds[1])
-    os.system(myCmds[2])
-    os.system(myCmds[3])
+myCmds.append('find -name auto_settings.sav_* -exec rm -fv {} \\;')
+myCmds.append('find -name auto_settings.savB* -exec rm -fv {} \\;')
+myCmds.append('find -name core.* -exec rm -fv {} \\;')
+myCmds.append('find -name *.exe.* -exec rm -fv {} \\;')
+## The exectution of my commands that I have placed in my array 
+os.system(myCmds[0])
+os.system(myCmds[1])
+os.system(myCmds[2])
+os.system(myCmds[3])
 
         
 
-    DATE = datetime.datetime.now()
-    checkMyOS = "more /etc/issue | cut -d '\\' -f1 | tr ' ' _"
-
-    OS = os.popen(checkMyOS).read()
+DATE = datetime.datetime.now()
+checkMyOS = "more /etc/issue | cut -d '\\' -f1 | tr ' ' _"
+OS = os.popen(checkMyOS).read()
         
 
 
-    ##Naming the tar file to be 
-    NAME = "" + arg1+ "_" + arg2 + "_" + arg3 + "_" + str(OS) + str(DATE)
-    NAME = NAME.replace("\n","")
-    NAME = NAME.replace("'","")
-    NAME = NAME.replace("$","")
-    NAME = NAME.replace(" ","_")
-    ## Path to the folder that will be containing the tar
-    # will be created if it does nto exists
+##Naming the tar file to be 
+NAME = arg3 + "_" + str(OS) + str(DATE) + ".tgz"
+NAME = NAME.replace("\n","")
+NAME = NAME.replace("'","")
+NAME = NAME.replace("$","")
+NAME = NAME.replace(" ","_")
+NAME = NAME.replace(":","-")
+## Path to the folder that will be containing the tar
+# will be created if it does nto exists
 
-    DESTINATION = "DEPLOYMENTS"
+DESTINATION = "DEPLOYMENTS"
 
     
 
-    myCmds = []
+myCmds = []
 
-    myCmds = ["mkdir -p " + DESTINATION + "", "rm -rf temp"
-    ,"mkdir temp","cp components/scripts/generateEnvPaths.sh temp",
-    ]
+myCmds = ["mkdir -p " + DESTINATION + "", "rm -rf temp"
+,"mkdir temp","cp components/scripts/generateEnvPaths.sh temp",
+]
 
-    for i in range(len(myCmds)):
-        temp = myCmds[i]
-        os.system(temp)
+for i in range(len(myCmds)):
+    temp = myCmds[i]
+    os.system(temp)
 
-    os.chmod("temp/",0o777)
-    HOME = os.popen("pwd").read()
+os.chmod("temp/",0o777)
+HOME = os.popen("pwd").read()
 
-    myCmdHome = "cd "+ HOME + ""
-    change_config = HOME + ""+ "" +change_config
-    change_config = change_config.replace("\n", "")
-    HOME = HOME.replace("\n","")
-    AREA_DETECTOR= "areaDetector/"
+myCmdHome = "cd "+ HOME + ""
+change_config = HOME + ""+ "" +change_config
+change_config = change_config.replace("\n", "")
+HOME = HOME.replace("\n","")
+AREA_DETECTOR= "areaDetector/"
 
-    os.system(HOME)
-    os.chdir(HOME+"/"+DESTINATION+"/")
-    tarFile = NAME + ".tgz"
-    readMe = "README_"+NAME+".txt"
-       
-    file = open(readMe, "w")
-    file.write(tarFile)
-    file.write("\n")
-    file.write("Version used in this deployment " + OS)
-    file.write("\n")
-    file.write("##   FOLDER NAME           :    GIT TAG          COMMIT MESSAGE    ##")
-    os.chdir(HOME)
-    
+os.system(HOME)
+os.chdir(HOME+"/"+DESTINATION+"/")
+tarFile = NAME + ".tgz"
+readMe = "README_"+NAME+".txt"
+      
+file = open(readMe, "w")
+file.write(tarFile)
+file.write("\n")
+file.write("Version used in this deployment " + OS)
+file.write("\n")
+file.write("##   FOLDER NAME           :    GIT TAG          COMMIT MESSAGE    ##")
+os.chdir(HOME)
+try:   
     with open(change_config, "r") as configChoice:
         DetectorArrayFound = False
         ModuleArrayFound = False
@@ -183,10 +177,13 @@ else:
         detectors = []
         module = []
         install_path =""
-        
+            
         for line in configChoice:
             line= line.strip()
             os.chdir(HOME)
+            if line.startswith('##EPIC_ARCH'):
+                t = line.split("=")
+                arg3 = t[1]
             if line.startswith('##Required File Start'):
                 DictionaryFound = True
             elif line.startswith('##Required File End'):
@@ -211,13 +208,13 @@ else:
                     if line.startswith("BIN") or line.startswith("LIB"):
                         line = line.strip()
                         l = line.split("=")
-                        
+                            
                         partOfInstall = str(l[1])
                         temp = "temp/" + str(l[1]) + "/"+ arg3
                         os.makedirs(temp)
                         
                         distutils.dir_util.copy_tree(install_path+partOfInstall+"/"+arg3, HOME +"/"+temp)
-                        
+                            
                         os.chdir(install_path+partOfInstall)
                         path = os.popen("pwd").read()
                         git = os.popen("git branch").read()
@@ -229,7 +226,7 @@ else:
                         msg =msg.replace("commit ", "")
                         file.write("\n")
                         file.write(install_path + partOfInstall + "/" + arg3 + " : " + version + " " + msg)
-                        
+                            
                     else:
                         line = line.strip()
                         l = line.split("=")
@@ -238,7 +235,7 @@ else:
                         temp = "temp/" + str(l[1])
                         os.makedirs(temp)
                         distutils.dir_util.copy_tree(install_path+partOfInstall, HOME +"/"+temp)  
-                        
+                            
                         os.chdir(install_path+partOfInstall)
                         path = os.popen("pwd").read()
                         git = os.popen("git branch").read()
@@ -250,7 +247,7 @@ else:
                         msg =msg.replace("commit ", "")
                         file.write("\n")
                         file.write(install_path + partOfInstall + " : " + version + " "+ msg)
-                        
+                            
             if DetectorArrayFound and not line.startswith('#') and len(line) > 2:
                 if line.startswith("INSTALL_PATH"):
                     line = line.strip()
@@ -264,7 +261,7 @@ else:
                     temp = "temp/support/areaDetector/" + line
                     os.makedirs(temp)
                     distutils.dir_util.copy_tree(install_path+AREA_DETECTOR+partOfInstall, HOME +"/"+temp)  
-                  
+                    
                     os.chdir(install_path+AREA_DETECTOR+partOfInstall)
                     path = os.popen("pwd").read()
                     git = os.popen("git branch").read()
@@ -292,7 +289,7 @@ else:
                     temp = "temp/support/" + line
                     os.makedirs(temp)
                     distutils.dir_util.copy_tree(install_path+partOfInstall, HOME +"/"+temp)  
-                  
+                    
                     os.chdir(install_path+partOfInstall)
                     path = os.popen("pwd").read()
                     git = os.popen("git branch").read()
@@ -306,9 +303,12 @@ else:
                     file.write(install_path +partOfInstall + " : " + version + " "+ msg)
     file.close()
     print("TARRING IN PROGRESS")
-    #tarring = tarfile.open(NAME+".tgz", "w:gz")
-    #tarring.add("temp", arcname=os.path.basename("temp"))
-    #tarring.close()
-    subprocess.call(["tar", "-czf", "test.tgz", "temp"])
+    subprocess.call(["tar", "-czf",NAME, "temp"])
+    print("TARRING COMPLETED!")
+except:
+    print("Make sure your packages are correct!")
+    print("Crashed at: " +install_path + partOfInstall)
+    print("Make sure that what's above is correct")
+
 
 

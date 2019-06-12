@@ -2,8 +2,23 @@
 ##Name of Required Epic Modules
 ## Follow the format that we have here
 
+##YOU MUST CHANGE INSTALL_PATH TO FOLLOW YOUR FOLLOW PATH STYLE
+## IT MUST END IN A /
+
+
+##THIS NEEDS TO BE CHANGED IF DEFULT ISNT "linux-86_64"
+##EPIC_ARCH=linux-x86_64
+
+##CHANGE THIS IF YOU HAVE YOUR OWN FILE
+
 ##Required File Start
+
+
+
 INSTALL_PATH=/EPICS/
+
+
+
 BIN=base/bin
 LIB=base/lib
 PERL=base/lib/perl
@@ -24,6 +39,9 @@ SSCAN=support/sscan
 
 ##Detector array start
 INSTALL_PATH=/EPICS/support/
+
+
+
 ADProsilica 
 ADSimDetector
 ADPluginBar
@@ -42,6 +60,9 @@ ADPointGrey
 
 ##Modules start
 INSTALL_PATH=/EPICS/support/
+
+
+
 modbus
 
 quadEM

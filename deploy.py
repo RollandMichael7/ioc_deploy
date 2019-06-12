@@ -8,6 +8,8 @@ import argparse
 import shutil
 import distutils.dir_util 
 import stat
+import tarfile
+import zipfile
 
 knownArgs = ""
 
@@ -159,7 +161,7 @@ else:
     change_config = HOME + ""+ "" +change_config
     change_config = change_config.replace("\n", "")
     HOME = HOME.replace("\n","")
-    AREA_DETECTOR= "areaDetector"
+    AREA_DETECTOR= "areaDetector/"
 
     os.system(HOME)
     os.chdir(HOME+"/"+DESTINATION+"/")
@@ -171,7 +173,7 @@ else:
     file.write("\n")
     file.write("Version used in this deployment " + OS)
     file.write("\n")
-    file.write("##FOLDER NAME : GIT TAG##")
+    file.write("##   FOLDER NAME           :    GIT TAG          COMMIT MESSAGE    ##")
     os.chdir(HOME)
     
     with open(change_config, "r") as configChoice:
@@ -183,20 +185,23 @@ else:
         install_path =""
         
         for line in configChoice:
-            ##print(line)
             line= line.strip()
+            os.chdir(HOME)
             if line.startswith('##Required File Start'):
                 DictionaryFound = True
             elif line.startswith('##Required File End'):
                 DictionaryFound = False
+                install_path = ""
             elif line.startswith('##Detector array start'):
                 DetectorArrayFound = True
             elif line.startswith('##Detector array end'):
                 DetectorArrayFound = False
+                install_path = ""
             elif line.startswith('##Modules start'): 
                 ModuleArrayFound = True
             elif line.startswith('##Modules end'):
                 ModuleArrayFound = False
+                install_path = ""
             if DictionaryFound and not line.startswith('#') and len(line) > 2:
                 if line.startswith("INSTALL_PATH"):
                     line = line.strip()
@@ -212,17 +217,19 @@ else:
                         os.makedirs(temp)
                         
                         distutils.dir_util.copy_tree(install_path+partOfInstall+"/"+arg3, HOME +"/"+temp)
-                        """
+                        
                         os.chdir(install_path+partOfInstall)
                         path = os.popen("pwd").read()
                         git = os.popen("git branch").read()
                         start = git.find("R")
                         end = git.find(")")
                         version = git[start:end]
-                        ##commit_msg =os.popen("git log").read()
+                        commit_msg = os.popen("git log").read()
+                        msg = commit_msg.split('\n',1)[0]
+                        msg =msg.replace("commit ", "")
                         file.write("\n")
-                        file.write(install_path + partOfInstall + "/" + arg3 + " : " + version)
-                        """
+                        file.write(install_path + partOfInstall + "/" + arg3 + " : " + version + " " + msg)
+                        
                     else:
                         line = line.strip()
                         l = line.split("=")
@@ -231,20 +238,76 @@ else:
                         temp = "temp/" + str(l[1])
                         os.makedirs(temp)
                         distutils.dir_util.copy_tree(install_path+partOfInstall, HOME +"/"+temp)  
-                        """
+                        
                         os.chdir(install_path+partOfInstall)
                         path = os.popen("pwd").read()
                         git = os.popen("git branch").read()
                         start = git.find("R")
                         end = git.find(")")
                         version = git[start:end]
-                        ##commit_msg =os.popen("git log").read()
+                        commit_msg = os.popen("git log").read()
+                        msg = commit_msg.split('\n',1)[0]
+                        msg =msg.replace("commit ", "")
                         file.write("\n")
-                        file.write(install_path + partOfInstall + " : " + version)
-                        """
+                        file.write(install_path + partOfInstall + " : " + version + " "+ msg)
+                        
             if DetectorArrayFound and not line.startswith('#') and len(line) > 2:
-                line = line.strip()
-                detectors.append(line)        
+                if line.startswith("INSTALL_PATH"):
+                    line = line.strip()
+                    r = line.split("=")
+                    install_path = str(r[1])
+                else:
+                    line = line.strip()
+                    detectors.append(line) 
+
+                    partOfInstall = line
+                    temp = "temp/support/areaDetector/" + line
+                    os.makedirs(temp)
+                    distutils.dir_util.copy_tree(install_path+AREA_DETECTOR+partOfInstall, HOME +"/"+temp)  
+                  
+                    os.chdir(install_path+AREA_DETECTOR+partOfInstall)
+                    path = os.popen("pwd").read()
+                    git = os.popen("git branch").read()
+                    start = git.find("R")
+                    end = git.find(")")
+                    version = git[start:end]
+                    commit_msg = os.popen("git log").read()
+                    msg = commit_msg.split('\n',1)[0]
+                    msg =msg.replace("commit ", "")
+                    file.write("\n")
+                    file.write(install_path + AREA_DETECTOR +partOfInstall + " : " + version + " "+ msg)
+
             if ModuleArrayFound == True and not line.startswith('#') and len(line) > 2:
                 line = line.strip()
                 module.append(line)  
+                if line.startswith("INSTALL_PATH"):
+                    line = line.strip()
+                    r = line.split("=")
+                    install_path = str(r[1])
+                else:
+                    line = line.strip()
+                    detectors.append(line) 
+
+                    partOfInstall = line
+                    temp = "temp/support/" + line
+                    os.makedirs(temp)
+                    distutils.dir_util.copy_tree(install_path+partOfInstall, HOME +"/"+temp)  
+                  
+                    os.chdir(install_path+partOfInstall)
+                    path = os.popen("pwd").read()
+                    git = os.popen("git branch").read()
+                    start = git.find("R")
+                    end = git.find(")")
+                    version = git[start:end]
+                    commit_msg = os.popen("git log").read()
+                    msg = commit_msg.split('\n',1)[0]
+                    msg =msg.replace("commit ", "")
+                    file.write("\n")
+                    file.write(install_path +partOfInstall + " : " + version + " "+ msg)
+    file.close()
+    print("TARRING IN PROGRESS")
+    tarring = tarfile.open(NAME+".tgz", "w:gz")
+    tarring.add("temp/")
+    tarring.close()
+
+

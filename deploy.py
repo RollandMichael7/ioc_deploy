@@ -306,8 +306,9 @@ else:
                     file.write(install_path +partOfInstall + " : " + version + " "+ msg)
     file.close()
     print("TARRING IN PROGRESS")
-    tarring = tarfile.open(NAME+".tgz", "w:gz")
-    tarring.add("temp/")
-    tarring.close()
+    #tarring = tarfile.open(NAME+".tgz", "w:gz")
+    #tarring.add("temp", arcname=os.path.basename("temp"))
+    #tarring.close()
+    subprocess.call(["tar", "-czf", "test.tgz", "temp"])
 
 

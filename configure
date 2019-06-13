@@ -16,31 +16,31 @@
 
 
 INSTALL_PATH=/EPICS/
+?BASE=[INSTALL_PATH]base/
 
 
-
-BIN=base/bin
-LIB=base/lib
-PERL=base/lib/perl
-CONFIGURE=base/configure
-INCLUDE=base/include
-STARTUP=base/startup
-
+BIN=bin
+LIB=lib
+PERL=lib/perl
+CONFIGURE=configure
+INCLUDE=include
+STARTUP=startup
 
 
-ASYN=support/asyn
-AUTOSAVE=support/autosave
-BUSY=support/busy
-CALC=support/calc
-DEVIOCSTATS=/support/iocStats
-SEQ=support/seq
-SSCAN=support/sscan
+?SUPPORT=[INSTALL_PATH]support/
+
+ASYN=asyn
+AUTOSAVE=autosave
+BUSY=busy
+CALC=calc
+DEVIOCSTATS=iocStats
+SEQ=seq
+SSCAN=sscan
+CONFIGURE=configure
 ##Required File End
 
 ##Detector array start
-INSTALL_PATH=/EPICS/support/
-
-
+?SUPPORT=[INSTALL_PATH]support/
 
 ADProsilica 
 ADSimDetector
@@ -59,8 +59,7 @@ ADPointGrey
 ## add	itional EPICS modules to be packaged
 
 ##Modules start
-INSTALL_PATH=/EPICS/support/
-
+?SUPPORT=[INSTALL_PATH]support/
 
 
 modbus

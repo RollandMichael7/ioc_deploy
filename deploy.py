@@ -177,7 +177,7 @@ try:
         detectors = []
         module = []
         install_path =""
-            
+        original_path = ""
         for line in configChoice:
             line= line.strip()
             os.chdir(HOME)
@@ -188,31 +188,48 @@ try:
                 DictionaryFound = True
             elif line.startswith('##Required File End'):
                 DictionaryFound = False
-                install_path = ""
+                
             elif line.startswith('##Detector array start'):
                 DetectorArrayFound = True
+                print(install_path)
+                os.makedirs("temp/support/areaDetector/ADSupport")
+                distutils.dir_util.copy_tree(install_path+AREA_DETECTOR+"ADSupport" ,HOME +"/temp/support/areaDetector/ADSupport")
+                os.makedirs("temp/support/areaDetector/ADCore")
+                distutils.dir_util.copy_tree(install_path+AREA_DETECTOR+"ADCore" ,HOME +"/temp/support/areaDetector/ADCore")
+                print("Finished here")
             elif line.startswith('##Detector array end'):
                 DetectorArrayFound = False
-                install_path = ""
+                
             elif line.startswith('##Modules start'): 
                 ModuleArrayFound = True
             elif line.startswith('##Modules end'):
                 ModuleArrayFound = False
-                install_path = ""
+                
             if DictionaryFound and not line.startswith('#') and len(line) > 2:
                 if line.startswith("INSTALL_PATH"):
                     line = line.strip()
                     r = line.split("=")
                     install_path = str(r[1])
+                    original_path = install_path
+                elif line.startswith("?"):
+                    install_path = original_path
+                    line = line.strip()
+                    line = line.replace("?","")
+                    line = line.replace("[INSTALL_PATH]","")
+                    k = line.split("=")
+                    install_path = install_path + str(k[1])
+                    print(install_path)
+                    
+                    os.makedirs("temp/"+str(k[1]))
                 else:
                     if line.startswith("BIN") or line.startswith("LIB"):
                         line = line.strip()
                         l = line.split("=")
                             
                         partOfInstall = str(l[1])
-                        temp = "temp/" + str(l[1]) + "/"+ arg3
+                        temp = "temp/" + str(k[1]) +str(l[1]) + "/"+ arg3
                         os.makedirs(temp)
-                        
+                        print("Adding...... " + temp)
                         distutils.dir_util.copy_tree(install_path+partOfInstall+"/"+arg3, HOME +"/"+temp)
                             
                         os.chdir(install_path+partOfInstall)
@@ -232,8 +249,9 @@ try:
                         l = line.split("=")
                         
                         partOfInstall = str(l[1])
-                        temp = "temp/" + str(l[1])
+                        temp = "temp/" + str(k[1])+str(l[1])
                         os.makedirs(temp)
+                        print("Adding....... "+temp)
                         distutils.dir_util.copy_tree(install_path+partOfInstall, HOME +"/"+temp)  
                             
                         os.chdir(install_path+partOfInstall)
@@ -253,12 +271,25 @@ try:
                     line = line.strip()
                     r = line.split("=")
                     install_path = str(r[1])
+                elif line.startswith("?"):
+                    install_path = original_path
+                    line = line.strip()
+                    line = line.replace("?","")
+                    line = line.replace("[INSTALL_PATH]","")
+                    k = line.split("=")
+                    install_path = install_path + str(k[1])
+                    print(install_path)
+                    try:
+                        os.makedirs("temp/"+str(k[1]))
+                    except:
+                        print("")
                 else:
                     line = line.strip()
                     detectors.append(line) 
 
                     partOfInstall = line
-                    temp = "temp/support/areaDetector/" + line
+                    temp = "temp/support/areaDetector/" +line
+                    print("Adding...... "+temp)
                     os.makedirs(temp)
                     distutils.dir_util.copy_tree(install_path+AREA_DETECTOR+partOfInstall, HOME +"/"+temp)  
                     
@@ -281,13 +312,26 @@ try:
                     line = line.strip()
                     r = line.split("=")
                     install_path = str(r[1])
+                elif line.startswith("?"):
+                    install_path = original_path
+                    line = line.strip()
+                    line = line.replace("?","")
+                    line = line.replace("[INSTALL_PATH]","")
+                    k = line.split("=")
+                    install_path = install_path + str(k[1])
+                    print(install_path)
+                    try:
+                        os.makedirs("temp/"+str(k[1]))
+                    except:
+                        print("")
                 else:
                     line = line.strip()
                     detectors.append(line) 
 
                     partOfInstall = line
-                    temp = "temp/support/" + line
+                    temp = "temp/" + str(k[1])+line
                     os.makedirs(temp)
+                    print("Adding........ "+temp)
                     distutils.dir_util.copy_tree(install_path+partOfInstall, HOME +"/"+temp)  
                     
                     os.chdir(install_path+partOfInstall)
@@ -302,9 +346,15 @@ try:
                     file.write("\n")
                     file.write(install_path +partOfInstall + " : " + version + " "+ msg)
     file.close()
+    print("")
     print("TARRING IN PROGRESS")
-    subprocess.call(["tar", "-czf",NAME, "temp"])
+    subprocess.call(["tar", "-czf",NAME,"temp"])
     print("TARRING COMPLETED!")
+    shutil.move(NAME, DESTINATION)
+    print("Moved Tar into DEPLOYMENT")
+    
+
+
 except:
     print("Make sure your packages are correct!")
     print("Crashed at: " +install_path + partOfInstall)

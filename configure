@@ -1,0 +1,69 @@
+##This is my Config File to read from
+##Name of Required Epic Modules
+## Follow the format that we have here
+
+##YOU MUST CHANGE INSTALL_PATH TO FOLLOW YOUR FOLLOW PATH STYLE
+## IT MUST END IN A /
+
+
+##THIS NEEDS TO BE CHANGED IF DEFULT ISNT "linux-86_64"
+##EPIC_ARCH=linux-x86_64
+
+##CHANGE THIS IF YOU HAVE YOUR OWN FILE
+
+##Required File Start
+
+
+
+INSTALL_PATH=/EPICS/
+?BASE=[INSTALL_PATH]base/
+
+
+BIN=bin
+LIB=lib
+PERL=lib/perl
+CONFIGURE=configure
+INCLUDE=include
+STARTUP=startup
+
+
+?SUPPORT=[INSTALL_PATH]support/
+
+ASYN=asyn
+AUTOSAVE=autosave
+BUSY=busy
+CALC=calc
+DEVIOCSTATS=iocStats
+SEQ=seq
+SSCAN=sscan
+CONFIGURE=configure
+##Required File End
+
+##Detector array start
+?SUPPORT=[INSTALL_PATH]support/
+
+ADProsilica 
+ADSimDetector
+ADPluginBar
+ADCompVision
+ADPluginEdge
+ADUVC
+ADAndor3
+ADPilatus
+ADMerlin
+ADPointGrey
+##Detector array end
+
+##COMMENTED OUT ONES THAT YOU MAY NEED TO ADD IN THE FUTURE
+## ADLambda and ADEiger
+## add	itional EPICS modules to be packaged
+
+##Modules start
+?SUPPORT=[INSTALL_PATH]support/
+
+
+modbus
+
+quadEM
+##Modules end
+##END

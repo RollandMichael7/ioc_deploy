@@ -38,7 +38,7 @@ def argumentReader():
       print("I am going to change the config " + str(change_config))
       
     else:
-        change_config = "/configure"
+        change_config = "configure"
         arr.append(change_config)
     
 
@@ -63,10 +63,10 @@ def argumentReader():
     if knownArgs['f'] == True or knownArgs['a'] == True:
         if knownArgs['a'] == True:
             DetArray = "y"
-            print("Using list instead of prompt:")
+            ##print("Using list instead of prompt:")
             
-            for i in range(len(det)):
-                print(det[i])
+            ##for i in range(len(det)):
+                ##print(det[i])
 
         else:
             
@@ -120,12 +120,15 @@ os.system(myCmds[3])
 
 DATE = datetime.datetime.now()
 checkMyOS = "more /etc/issue | cut -d '\\' -f1 | tr ' ' _"
-OS = os.popen(checkMyOS).read()
-        
 
+OS = os.popen(checkMyOS).read()
+
+if OS.startswith("Invalid"):
+    print("MADE IT")
+    OS = platform.system()
 
 ##Naming the tar file to be 
-NAME = arg3 + "_" + str(OS) + str(DATE) + ".tgz"
+NAME = arg3 + "_" + str(OS) + str(DATE) 
 NAME = NAME.replace("\n","")
 NAME = NAME.replace("'","")
 NAME = NAME.replace("$","")
@@ -140,7 +143,7 @@ DESTINATION = "DEPLOYMENTS"
 
 myCmds = []
 
-myCmds = ["mkdir -p " + DESTINATION + "", "rm -rf temp"
+myCmds = ["mkdir " + DESTINATION + "", "rm -rf temp"
 ,"mkdir temp","cp components/scripts/generateEnvPaths.sh temp",
 ]
 
@@ -152,23 +155,24 @@ os.chmod("temp/",0o777)
 HOME = os.popen("pwd").read()
 
 myCmdHome = "cd "+ HOME + ""
-change_config = HOME + ""+ "" +change_config
+change_config = change_config
 change_config = change_config.replace("\n", "")
 HOME = HOME.replace("\n","")
 AREA_DETECTOR= "areaDetector/"
 
 os.system(HOME)
-os.chdir(HOME+"/"+DESTINATION+"/")
-tarFile = NAME + ".tgz"
+##os.chdir(HOME+"/"+DESTINATION+"/")
+
 readMe = "README_"+NAME+".txt"
-      
-file = open(readMe, "w")
+
+file = open(DESTINATION+"/"+readMe, "w")
+tarFile = NAME + ".tgz"
 file.write(tarFile)
 file.write("\n")
 file.write("Version used in this deployment " + OS)
 file.write("\n")
 file.write("##   FOLDER NAME           :    GIT TAG          COMMIT MESSAGE    ##")
-os.chdir(HOME)
+##os.chdir(HOME)
 try:   
     with open(change_config, "r") as configChoice:
         DetectorArrayFound = False
@@ -180,7 +184,7 @@ try:
         original_path = ""
         for line in configChoice:
             line= line.strip()
-            os.chdir(HOME)
+            ##os.chdir(HOME)
             if line.startswith('##EPIC_ARCH'):
                 t = line.split("=")
                 arg3 = t[1]
@@ -193,9 +197,11 @@ try:
                 DetectorArrayFound = True
                 print(install_path)
                 os.makedirs("temp/support/areaDetector/ADSupport")
-                distutils.dir_util.copy_tree(install_path+AREA_DETECTOR+"ADSupport" ,HOME +"/temp/support/areaDetector/ADSupport")
+                print("Adding ADSupport")
+                distutils.dir_util.copy_tree(install_path+AREA_DETECTOR+"ADSupport" ,"temp/support/areaDetector/ADSupport")
                 os.makedirs("temp/support/areaDetector/ADCore")
-                distutils.dir_util.copy_tree(install_path+AREA_DETECTOR+"ADCore" ,HOME +"/temp/support/areaDetector/ADCore")
+                print("Adding ADCore")
+                distutils.dir_util.copy_tree(install_path+AREA_DETECTOR+"ADCore" ,"temp/support/areaDetector/ADCore")
                 print("Finished here")
             elif line.startswith('##Detector array end'):
                 DetectorArrayFound = False
@@ -230,15 +236,15 @@ try:
                         temp = "temp/" + str(k[1]) +str(l[1]) + "/"+ arg3
                         os.makedirs(temp)
                         print("Adding...... " + temp)
-                        distutils.dir_util.copy_tree(install_path+partOfInstall+"/"+arg3, HOME +"/"+temp)
+                        distutils.dir_util.copy_tree(install_path+partOfInstall+"/"+arg3,temp)
                             
-                        os.chdir(install_path+partOfInstall)
+                        ##os.chdir(install_path+partOfInstall)
                         path = os.popen("pwd").read()
-                        git = os.popen("git branch").read()
+                        git = os.popen("git -C "+install_path+partOfInstall+" branch").read()
                         start = git.find("R")
                         end = git.find(")")
                         version = git[start:end]
-                        commit_msg = os.popen("git log").read()
+                        commit_msg = os.popen("git -C "+install_path+partOfInstall+" log").read()
                         msg = commit_msg.split('\n',1)[0]
                         msg =msg.replace("commit ", "")
                         file.write("\n")
@@ -252,15 +258,15 @@ try:
                         temp = "temp/" + str(k[1])+str(l[1])
                         os.makedirs(temp)
                         print("Adding....... "+temp)
-                        distutils.dir_util.copy_tree(install_path+partOfInstall, HOME +"/"+temp)  
+                        distutils.dir_util.copy_tree(install_path+partOfInstall, temp)  
                             
-                        os.chdir(install_path+partOfInstall)
+                        ##os.chdir(install_path+partOfInstall)
                         path = os.popen("pwd").read()
-                        git = os.popen("git branch").read()
+                        git = os.popen("git -C "+install_path+partOfInstall+" branch").read()
                         start = git.find("R")
                         end = git.find(")")
                         version = git[start:end]
-                        commit_msg = os.popen("git log").read()
+                        commit_msg = os.popen("git -C "+install_path+partOfInstall+" log").read()
                         msg = commit_msg.split('\n',1)[0]
                         msg =msg.replace("commit ", "")
                         file.write("\n")
@@ -291,15 +297,15 @@ try:
                     temp = "temp/support/areaDetector/" +line
                     print("Adding...... "+temp)
                     os.makedirs(temp)
-                    distutils.dir_util.copy_tree(install_path+AREA_DETECTOR+partOfInstall, HOME +"/"+temp)  
+                    distutils.dir_util.copy_tree(install_path+AREA_DETECTOR+partOfInstall, temp)  
                     
-                    os.chdir(install_path+AREA_DETECTOR+partOfInstall)
+                    ##os.chdir(install_path+AREA_DETECTOR+partOfInstall)
                     path = os.popen("pwd").read()
-                    git = os.popen("git branch").read()
+                    git = os.popen("git -C "+install_path+AREA_DETECTOR+partOfInstall+" branch").read()
                     start = git.find("R")
                     end = git.find(")")
                     version = git[start:end]
-                    commit_msg = os.popen("git log").read()
+                    git = os.popen("git -C "+install_path+AREA_DETECTOR+partOfInstall+" log").read()
                     msg = commit_msg.split('\n',1)[0]
                     msg =msg.replace("commit ", "")
                     file.write("\n")
@@ -329,18 +335,18 @@ try:
                     detectors.append(line) 
 
                     partOfInstall = line
-                    temp = "temp/" + str(k[1])+line
+                    print(str(k[1]))
+                    temp = "temp/" + str(k[1]) +line
                     os.makedirs(temp)
                     print("Adding........ "+temp)
-                    distutils.dir_util.copy_tree(install_path+partOfInstall, HOME +"/"+temp)  
-                    
-                    os.chdir(install_path+partOfInstall)
+                    distutils.dir_util.copy_tree(install_path+partOfInstall, temp)  
+                    ##os.chdir(install_path+partOfInstall)
                     path = os.popen("pwd").read()
-                    git = os.popen("git branch").read()
+                    git = os.popen("git -C "+install_path+partOfInstall+" branch").read()
                     start = git.find("R")
                     end = git.find(")")
                     version = git[start:end]
-                    commit_msg = os.popen("git log").read()
+                    git = os.popen("git -C "+install_path+partOfInstall+" log").read()
                     msg = commit_msg.split('\n',1)[0]
                     msg =msg.replace("commit ", "")
                     file.write("\n")
@@ -348,9 +354,9 @@ try:
     file.close()
     print("")
     print("TARRING IN PROGRESS")
-    subprocess.call(["tar", "-czf",NAME,"temp"])
+    subprocess.call(["tar", "-czf",DESTINATION+"/"+tarFile,"temp"])
     print("TARRING COMPLETED!")
-    shutil.move(NAME, DESTINATION)
+    ##shutil.move(NAME, DESTINATION)
     print("Moved Tar into DEPLOYMENT")
     
 

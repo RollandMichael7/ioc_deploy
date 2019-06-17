@@ -19,19 +19,11 @@ def argumentReader():
     
     arr = []
     parser = argparse.ArgumentParser(description='To allow downloading of EPICS on different Systems')
-    parser.add_argument('-f', '--f', action = 'store_true', help="")
-    parser.add_argument('-a', '--a', action = 'store_true', help="")
     parser.add_argument('-c', '--changeconfig', nargs='?',help='Allows for you to have a unqiue config file.')
         
-    #check = vars(parser.parse_args())
-
     check = parser.parse_known_args()
-
-
-
     knownArgs = vars(check[0])
     
-
     if knownArgs['changeconfig'] is not None:
       change_config = knownArgs['changeconfig']
       arr.append(str(change_config))
@@ -40,63 +32,17 @@ def argumentReader():
     else:
         change_config = "configure"
         arr.append(change_config)
-    
-
-    
-     
-    # Argument flags:
-    #-f: Skip prompt to add another driver
-    #-a: Skip prompt and use list of drivers "det" instead
-    #-h: Display help
-    DetArray = "n"
-    SKIP = "n"
-
-    if "-h" in knownArgs:
-        print("Tool for creating a deployment of an "
-        + "AreaDectctor IOC. \nEnsure macros are set " 
-        + "correctly before running.\n \ndeploy.sh [-f] [-a] [DRIVER] [VERSION] [ARCH] "
-        + "\neg. deploy.sh ADProsilica R2-4 linux-x86_64 "
-        + "\n\nFlags:\n-f : Deploy only the detector given (Bypass prompt) "         
-        + "\n-a : Deploy the detectors given by the ""det"" array in the script (Bypass prompt)")
-        sys.exit(0)
-       
-    if knownArgs['f'] == True or knownArgs['a'] == True:
-        if knownArgs['a'] == True:
-            DetArray = "y"
-            ##print("Using list instead of prompt:")
-            
-            ##for i in range(len(det)):
-                ##print(det[i])
-
-        else:
-            
-            SKIP = "y"
-            print("Skipping Prompt.....")
-        
-        
         
         return arr
-    else:
-        print("Bad Arguments")
-        sys.exit(0)
-
-
-arg3 = ""
-
+    
 
 list = argumentReader()                
 
 
 change_config = list[0]
-arg1 = ""
-arg2 = ""
 arg3 = ""
 
-
-final = len(sys.argv)
-
 print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Starting Script~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-
 
 myCmds = [] ##I created a array that will store all my commands that i want to exectue on the command line
 
@@ -124,7 +70,6 @@ checkMyOS = "more /etc/issue | cut -d '\\' -f1 | tr ' ' _"
 OS = os.popen(checkMyOS).read()
 
 if OS.startswith("Invalid"):
-    print("MADE IT")
     OS = platform.system()
 
 ##Naming the tar file to be 
@@ -161,7 +106,6 @@ HOME = HOME.replace("\n","")
 AREA_DETECTOR= "areaDetector/"
 
 os.system(HOME)
-##os.chdir(HOME+"/"+DESTINATION+"/")
 
 readMe = "README_"+NAME+".txt"
 
@@ -172,7 +116,7 @@ file.write("\n")
 file.write("Version used in this deployment " + OS)
 file.write("\n")
 file.write("##   FOLDER NAME           :    GIT TAG          COMMIT MESSAGE    ##")
-##os.chdir(HOME)
+##I try to open the file and read in information
 try:   
     with open(change_config, "r") as configChoice:
         DetectorArrayFound = False
@@ -182,9 +126,10 @@ try:
         module = []
         install_path =""
         original_path = ""
+        ##for loop for each line in the configure file
         for line in configChoice:
             line= line.strip()
-            ##os.chdir(HOME)
+            ##I determine which arch they are using
             if line.startswith('##EPIC_ARCH'):
                 t = line.split("=")
                 arg3 = t[1]
@@ -196,6 +141,7 @@ try:
             elif line.startswith('##Detector array start'):
                 DetectorArrayFound = True
                 print(install_path)
+                ##Force them to add ADSupport and ADCore
                 os.makedirs("temp/support/areaDetector/ADSupport")
                 print("Adding ADSupport")
                 distutils.dir_util.copy_tree(install_path+AREA_DETECTOR+"ADSupport" ,"temp/support/areaDetector/ADSupport")
@@ -213,11 +159,13 @@ try:
                 
             if DictionaryFound and not line.startswith('#') and len(line) > 2:
                 if line.startswith("INSTALL_PATH"):
+                    ##I figure out the install path they have
                     line = line.strip()
                     r = line.split("=")
                     install_path = str(r[1])
                     original_path = install_path
                 elif line.startswith("?"):
+                    ##I figure out what they want downloaed
                     install_path = original_path
                     line = line.strip()
                     line = line.replace("?","")
@@ -231,14 +179,13 @@ try:
                     if line.startswith("BIN") or line.startswith("LIB"):
                         line = line.strip()
                         l = line.split("=")
-                            
+                        ##I copy the files here and make dirs
                         partOfInstall = str(l[1])
                         temp = "temp/" + str(k[1]) +str(l[1]) + "/"+ arg3
                         os.makedirs(temp)
                         print("Adding...... " + temp)
                         distutils.dir_util.copy_tree(install_path+partOfInstall+"/"+arg3,temp)
                             
-                        ##os.chdir(install_path+partOfInstall)
                         path = os.popen("pwd").read()
                         git = os.popen("git -C "+install_path+partOfInstall+" branch").read()
                         start = git.find("R")
@@ -253,14 +200,13 @@ try:
                     else:
                         line = line.strip()
                         l = line.split("=")
-                        
+                        ##I copy the files here and make dirs
                         partOfInstall = str(l[1])
                         temp = "temp/" + str(k[1])+str(l[1])
                         os.makedirs(temp)
                         print("Adding....... "+temp)
                         distutils.dir_util.copy_tree(install_path+partOfInstall, temp)  
                             
-                        ##os.chdir(install_path+partOfInstall)
                         path = os.popen("pwd").read()
                         git = os.popen("git -C "+install_path+partOfInstall+" branch").read()
                         start = git.find("R")
@@ -292,14 +238,13 @@ try:
                 else:
                     line = line.strip()
                     detectors.append(line) 
-
+                    ##I copy the files here and make dirs
                     partOfInstall = line
                     temp = "temp/support/areaDetector/" +line
                     print("Adding...... "+temp)
                     os.makedirs(temp)
                     distutils.dir_util.copy_tree(install_path+AREA_DETECTOR+partOfInstall, temp)  
                     
-                    ##os.chdir(install_path+AREA_DETECTOR+partOfInstall)
                     path = os.popen("pwd").read()
                     git = os.popen("git -C "+install_path+AREA_DETECTOR+partOfInstall+" branch").read()
                     start = git.find("R")
@@ -333,14 +278,14 @@ try:
                 else:
                     line = line.strip()
                     detectors.append(line) 
-
+                    ##I copy the files here and make dirs
                     partOfInstall = line
                     print(str(k[1]))
                     temp = "temp/" + str(k[1]) +line
                     os.makedirs(temp)
                     print("Adding........ "+temp)
                     distutils.dir_util.copy_tree(install_path+partOfInstall, temp)  
-                    ##os.chdir(install_path+partOfInstall)
+
                     path = os.popen("pwd").read()
                     git = os.popen("git -C "+install_path+partOfInstall+" branch").read()
                     start = git.find("R")
@@ -356,15 +301,10 @@ try:
     print("TARRING IN PROGRESS")
     subprocess.call(["tar", "-czf",DESTINATION+"/"+tarFile,"temp"])
     print("TARRING COMPLETED!")
-    ##shutil.move(NAME, DESTINATION)
     print("Moved Tar into DEPLOYMENT")
-    
-
 
 except:
     print("Make sure your packages are correct!")
     print("Crashed at: " +install_path + partOfInstall)
     print("Make sure that what's above is correct")
-
-
-
+    ##Error handling 

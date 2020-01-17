@@ -2,7 +2,7 @@
 
 
 Author: Michael Rolland  
-Corresponding Authors: Kazimierz Gofron, Jakud Wlodek, Michael Posada  
+Corresponding Authors: Kazimierz Gofron, Jakub Wlodek, Michael Posada  
 Created: July 18, 2018  
 Last Updated: June 17, 2019   
 Copyright (c): 2018-2019 Brookhaven National Laboratory  

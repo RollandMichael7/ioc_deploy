@@ -1,11 +1,18 @@
 # ioc_deploy #
 
+
+Author: Michael Rolland  
+Corresponding Authors: Kazimierz Gofron, Jakud Wlodek, Michael Posada  
+Created: July 18, 2018  
+Last Updated: June 17, 2019   
+Copyright (c): 2018-2019 Brookhaven National Laboratory  
+
 ## Online manual can be found [here](https://rollandmichael7.github.io/ioc-manual/) ##
 
 **This script is a modified version of Mark Rivers's makeADPrebuilt script, which can be found at 
 https://github.com/areaDetector/areaDetector/blob/master/makeADPrebuilt**
 
-This script create a portable deployment of an areaDetector plugin that was previously compiled locally. The script creates a tarball archive of all the necessary files for an IOC in a target directory. The tarball also contains a generateEnvPaths bash script which can create a usable envPaths file for any external IOC that needs to use this deployment. In the same folder as the tarball will be a README file which documents the version for each component that was used in the deployment.
+This script creates a portable deployment of an areaDetector plugin that was previously compiled locally. The script creates a tarball archive of all the necessary files for an IOC in a target directory. The tarball also contains a generateEnvPaths bash script which can create a usable envPaths file for any external IOC that needs to use this deployment. In the same folder as the tarball will be a README file which documents the version for each component that was used in the deployment.
 
 ## Requirements ##
 - ADSupport, ADCore, and any detectors to be copied must be compiled already.
